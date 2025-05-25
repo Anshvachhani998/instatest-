@@ -6,6 +6,8 @@ from collections import deque
 import re
 from bot import message_map, queue, processing
 
+app = Client
+
 USERBOT_CHAT_ID = 5785483456
 
 @Client.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
