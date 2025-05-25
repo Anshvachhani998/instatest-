@@ -129,14 +129,14 @@ async def group_reply_handler(client, message):
     if user_info:
         user_id, original_msg_id = user_info
 
-        # Forward reply to original user
         await client.copy_message(
             chat_id=user_id,
             from_chat_id=GROUP_ID,
-            message_id=message.id  # also change here for consistency
+            message_id=message.id,
+            caption="Your new caption here"
+
         )
 
-        # Clean up map entry
         del message_map[reply_to_id]
 
 
