@@ -20,7 +20,7 @@ logging.getLogger("pyrogram").setLevel(logging.ERROR)
 pyroutils.MIN_CHAT_ID = -999999999999
 pyroutils.MIN_CHANNEL_ID = -100999999999999
 
-
+GROUP_ID = -1002506415678
 USERBOT_CHAT_ID = 5785483456
 
 # ----- Bot with Plugins -----
@@ -82,7 +82,7 @@ queue = deque()
 processing = False
 message_map = {}
 
-GROUP_ID = -1001234567890  # replace with your group ID
+
 
 @userbot.on_message(filters.private & filters.text & filters.incoming)
 async def userbot_receive_link(client, message):
