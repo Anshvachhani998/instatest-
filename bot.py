@@ -63,7 +63,7 @@ class Userbot(Client):
             plugins={"root": "plugins"},
             workers=50,
         )
-
+app = bot()
 userbot = Userbot()
 
 # Yeh decorator userbot.start ke baad hi hona chahiye
@@ -109,7 +109,7 @@ async def process_queue(client):
 
 USERBOT_CHAT_ID = 5785483456
 
-@Client.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
+@app.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
 async def bot_receive_link(client, message):
     # Bot ko private message Instagram link mila
     # Ab ye link userbot ko bhejna hai
@@ -132,7 +132,7 @@ async def group_reply_handler(client, message):
         del message_map[reply_id]
 
 # ----- Main Runner -----
-app = Bot()
+
 
 async def main():
     await app.start()
