@@ -37,9 +37,12 @@ class Bot(Client):
         now = datetime.now(tz)
         time = now.strftime("%H:%M:%S %p")
         await self.send_message(chat_id=LOG_CHANNEL, text=f"✅ Bot Restarted! 📅 Date: {today} 🕒 Time: {time}")
-        app = web.AppRunner(await web_server())
-        await app.setup()
-        await web.TCPSite(app, "0.0.0.0", PORT).start()
+
+        # Start webserver inside this task so it runs concurrently
+        app_runner = web.AppRunner(await web_server())
+        await app_runner.setup()
+        site = web.TCPSite(app_runner, "0.0.0.0", PORT)
+        await site.start()
         logging.info(f"🌐 Web Server Running on PORT {PORT}")
 
     async def stop(self, *args):
@@ -50,16 +53,27 @@ class Bot(Client):
 app = Bot()
 userbot = Client(name="userbot", api_id=API_ID, api_hash=API_HASH, session_string=USER_SESSION)
 
-
 async def main():
+    # Start bot and userbot concurrently
     await asyncio.gather(
-        userbot.start(),
         app.start(),
+        userbot.start()
     )
-    print("Both Bot and Userbot started.")
-    # Keep the program running
-    await asyncio.Future()
+    logging.info("Both bot and userbot started.")
 
+    # Run until canceled
+    await asyncio.Event().wait()
+
+async def shutdown():
+    await asyncio.gather(
+        app.stop(),
+        userbot.stop()
+    )
+    logging.info("Both bot and userbot stopped.")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        logging.info("Stopping bot and userbot...")
+        asyncio.run(shutdown())
