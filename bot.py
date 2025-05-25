@@ -63,7 +63,7 @@ class Userbot(Client):
             plugins={"root": "plugins"},
             workers=50,
         )
-app = bot()
+app = Bot()
 userbot = Userbot()
 
 # Yeh decorator userbot.start ke baad hi hona chahiye
