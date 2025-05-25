@@ -200,7 +200,7 @@ async def bot_reply_handler(client, message):
                 from_chat_id=USERBOT_CHAT_ID,
                 message_id=message.id,
                 reply_to_message_id=original_msg_id,
-                caption=message.caption or "✅ Here is your file."
+                caption="**ʜᴇʀᴇ ɪꜱ ʏᴏᴜʀ Rᴇᴇʟꜱ 🎥**\n\n**ᴘʀᴏᴠɪᴅᴇᴅ ʙʏ @Ans_Bots**",
             )
         elif is_wait_msg:
             forwarded_msg = await client.send_message(
@@ -210,7 +210,13 @@ async def bot_reply_handler(client, message):
         else:
             forwarded_msg = await client.send_message(
                 chat_id=user_id,
-                text="❌ Sorry, the requested content was not found."
+                text=(
+                    "**⛔️ Publication information could not be retrieved**\n\n"
+                    "**Possible causes:**\n"
+                    "**▫️closed (private) account;**\n"
+                    "**▫️data retrieval error;**\n"
+                    "**▫️the account has age restrictions.**"
+                )
             )
     except Exception as e:
         print("❌ Error sending to user:", e)
