@@ -7,10 +7,8 @@ from pyrogram.raw.all import layer
 from aiohttp import web
 import pytz
 from datetime import date, datetime
-from aiohttp import web
 from plugins import web_server
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_CHANNEL, PORT, USER_SESSION
-from pyrogram import types
 from pyrogram import utils as pyroutils
 
 pyroutils.MIN_CHAT_ID = -999999999999
@@ -33,7 +31,6 @@ class Bot(Client):
             sleep_threshold=10,
         )
         
-
     async def start(self):
         await super().start()
         me = await self.get_me()
@@ -53,5 +50,12 @@ class Bot(Client):
         logging.info("🛑 Bot Stopped.")
 
 app = Bot()
-app.run()
-userbot.run()
+
+async def main():
+    await app.start()
+    await userbot.start()
+    logging.info("✅ Both bot and userbot started.")
+    await asyncio.Event().wait()  # Keep running forever
+
+if __name__ == "__main__":
+    asyncio.run(main())
