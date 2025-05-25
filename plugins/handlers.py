@@ -3,7 +3,7 @@ import asyncio
 from collections import deque
 
 GROUP_ID = -1002506415678
-
+ 
 app = Client
 queue = deque()
 processing = False
