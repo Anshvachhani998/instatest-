@@ -1,6 +1,7 @@
-from pyrogram import userbot, filters
+from pyrogram.handlers import MessageHandler
 
+async def userbot_ping(client, message):
+    if message.text.lower() == "!ping":
+        await message.reply("🏓 Userbot is running!")
 
-@userbot.on_message(filters.private & filters.incoming)
-async def userbot_test(client, message):
-    await message.reply("✅ Userbot is running!")
+userbot.add_handler(MessageHandler(userbot_ping, filters.private & filters.text & filters.incoming))
