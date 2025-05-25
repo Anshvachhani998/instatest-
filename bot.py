@@ -123,7 +123,7 @@ async def process_queue(client):
 
 @userbot.on_message(filters.chat(GROUP_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
 async def group_reply_handler(client, message):
-    reply_to_id = message.reply_to_message.message_id
+    reply_to_id = message.reply_to_message.id  # change here
     user_info = message_map.get(reply_to_id)
 
     if user_info:
@@ -133,11 +133,12 @@ async def group_reply_handler(client, message):
         await client.copy_message(
             chat_id=user_id,
             from_chat_id=GROUP_ID,
-            message_id=message.message_id
+            message_id=message.id  # also change here for consistency
         )
 
         # Clean up map entry
         del message_map[reply_to_id]
+
 
 
 USERBOT_CHAT_ID = 5785483456
