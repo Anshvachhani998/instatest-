@@ -1,5 +1,4 @@
 import logging
-import logging.config
 import os
 import asyncio
 from pyrogram import Client, __version__
@@ -7,10 +6,8 @@ from pyrogram.raw.all import layer
 from aiohttp import web
 import pytz
 from datetime import date, datetime
-from aiohttp import web
 from plugins import web_server
-from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_CHANNEL, PORT
-from pyrogram import types
+from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_CHANNEL, PORT, USER_SESSION
 from pyrogram import utils as pyroutils
 
 pyroutils.MIN_CHAT_ID = -999999999999
@@ -19,7 +16,7 @@ pyroutils.MIN_CHANNEL_ID = -100999999999999
 logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 
-
+# ✅ Bot Client Class
 class Bot(Client):
     def __init__(self):
         super().__init__(
@@ -50,5 +47,18 @@ class Bot(Client):
         await super().stop()
         logging.info("🛑 Bot Stopped.")
 
+# ✅ Create bot and userbot instances
 app = Bot()
-app.run()
+userbot = Client(name="userbot", api_id=API_ID, api_hash=API_HASH, session_string=USER_SESSION)
+
+# ✅ Global export (for plugin access)
+__all__ = ["app", "userbot"]
+
+# ✅ Start both bot and userbot
+async def start_all():
+    await userbot.start()
+    await app.start()
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(start_all())
+loop.run_forever()
