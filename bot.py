@@ -115,7 +115,7 @@ async def bot_receive_link(client, message):
     # Ab ye link userbot ko bhejna hai
     await message.reply("✅ Link received. Processing...")
 
-    await userbot.send_message(USERBOT_CHAT_ID, message.text)
+    await app.send_message(USERBOT_CHAT_ID, message.text)
 
 
 @userbot.on_message(filters.chat(GROUP_ID) & (filters.video | filters.document | filters.photo) & filters.reply)
