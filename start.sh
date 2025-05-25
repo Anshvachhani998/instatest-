@@ -13,7 +13,7 @@ fi
 
 # Pull the latest updates
 echo "🔄 Updating repository..."
-sudo git pull origin main
+sudo git pull https://github.com/Anshvachhani998/instatest-
 
 
 # Restart Docker Container
