@@ -1,6 +1,4 @@
 import logging
-import logging.config
-import os
 import asyncio
 from pyrogram import Client, __version__
 from pyrogram.raw.all import layer
@@ -9,16 +7,19 @@ import pytz
 from datetime import date, datetime
 from plugins import web_server
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_CHANNEL, PORT, USER_SESSION
-from pyrogram import utils as pyroutils
-
-pyroutils.MIN_CHAT_ID = -999999999999
-pyroutils.MIN_CHANNEL_ID = -100999999999999
 
 logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 
-userbot = Client(name="userbot", api_id=API_ID, api_hash=API_HASH, session_string=USER_SESSION)
+# Userbot (Client without bot_token)
+userbot = Client(
+    name="userbot",
+    api_id=API_ID,
+    api_hash=API_HASH,
+    session_string=USER_SESSION
+)
 
+# Bot with plugins
 class Bot(Client):
     def __init__(self):
         super().__init__(
@@ -26,23 +27,31 @@ class Bot(Client):
             api_id=API_ID,
             api_hash=API_HASH,
             bot_token=BOT_TOKEN,
+            plugins={"root": "plugins"},  # Plugin folder
             workers=200,
-            plugins={"root": "plugins"},
             sleep_threshold=10,
         )
-        
+
     async def start(self):
         await super().start()
         me = await self.get_me()
         logging.info(f"🤖 {me.first_name} (@{me.username}) running on Pyrogram v{__version__} (Layer {layer})")
+
+        # Send log
         tz = pytz.timezone('Asia/Kolkata')
-        today = date.today()
         now = datetime.now(tz)
+        today = now.date()
         time = now.strftime("%H:%M:%S %p")
-        await self.send_message(chat_id=LOG_CHANNEL, text=f"✅ Bot Restarted! 📅 Date: {today} 🕒 Time: {time}")
-        app = web.AppRunner(await web_server())
-        await app.setup()
-        await web.TCPSite(app, "0.0.0.0", PORT).start()
+
+        await self.send_message(
+            chat_id=LOG_CHANNEL,
+            text=f"✅ Bot Restarted!\n📅 Date: {today}\n🕒 Time: {time}"
+        )
+
+        # Start web server
+        runner = web.AppRunner(await web_server())
+        await runner.setup()
+        await web.TCPSite(runner, "0.0.0.0", PORT).start()
         logging.info(f"🌐 Web Server Running on PORT {PORT}")
 
     async def stop(self, *args):
@@ -51,11 +60,16 @@ class Bot(Client):
 
 app = Bot()
 
+# Main function to start both clients
 async def main():
     await app.start()
+    logging.info("✅ Bot client started.")
+
     await userbot.start()
-    logging.info("✅ Both bot and userbot started.")
-    await asyncio.Event().wait()  # Keep running forever
+    logging.info("✅ Userbot client started.")
+
+    # Keep alive
+    await asyncio.Event().wait()
 
 if __name__ == "__main__":
     asyncio.run(main())
