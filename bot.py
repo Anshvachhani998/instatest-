@@ -62,7 +62,7 @@ app = Bot()
 
 # Main function to start both clients
 async def main():
-    await app.start()
+    await app.run()
     logging.info("✅ Bot client started.")
 
     await userbot.start()
@@ -70,6 +70,3 @@ async def main():
 
     # Keep alive
     await asyncio.Event().wait()
-
-if __name__ == "__main__":
-    main.run()
