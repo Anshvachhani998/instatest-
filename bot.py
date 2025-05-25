@@ -1,6 +1,8 @@
+# bot.py
+
 import logging
 import asyncio
-from pyrogram import Client, __version__
+from pyrogram import Client, __version__, filters
 from pyrogram.raw.all import layer
 from aiohttp import web
 import pytz
@@ -11,15 +13,7 @@ from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_CHANNEL, PORT, USER_S
 logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 
-# Userbot (Client without bot_token)
-userbot = Client(
-    name="userbot",
-    api_id=API_ID,
-    api_hash=API_HASH,
-    session_string=USER_SESSION
-)
-
-# Bot with plugins
+# ----- Bot with Plugins -----
 class Bot(Client):
     def __init__(self):
         super().__init__(
@@ -42,11 +36,7 @@ class Bot(Client):
         now = datetime.now(tz)
         today = now.date()
         time = now.strftime("%H:%M:%S %p")
-
-        await self.send_message(
-            chat_id=LOG_CHANNEL,
-            text=f"✅ Bot Restarted!\n📅 Date: {today}\n🕒 Time: {time}"
-        )
+        await self.send_message(chat_id=LOG_CHANNEL, text=f"✅ Bot Restarted!\n📅 Date: {today}\n🕒 Time: {time}")
 
         # Start web server
         runner = web.AppRunner(await web_server())
@@ -58,6 +48,24 @@ class Bot(Client):
         await super().stop()
         logging.info("🛑 Bot Stopped.")
 
+
+# ----- Userbot -----
+userbot = Client(
+    name="userbot",
+    api_id=API_ID,
+    api_hash=API_HASH,
+    session_string=USER_SESSION
+)
+
+
+# Yeh decorator userbot.start ke baad hi hona chahiye
+@userbot.on_message(filters.private & filters.text & filters.incoming)
+async def userbot_ping(client, message):
+    if message.text.lower() == "!ping":
+        await message.reply("🏓 Userbot is running!")
+
+
+# ----- Main Runner -----
 app = Bot()
 
 async def main():
@@ -65,17 +73,9 @@ async def main():
     logging.info("✅ Bot client started.")
 
     await userbot.start()
-
-    @userbot.on_message(filters.private & filters.incoming & filters.text)
-    async def userbot_ping(client, message):
-        if message.text.lower() == "!ping":
-            await message.reply("🏓 **Pong!** Userbot is active.")
-
     logging.info("✅ Userbot client started.")
 
-    # Keep alive
     await asyncio.Event().wait()
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    asyncio.run(main())
