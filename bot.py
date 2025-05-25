@@ -192,7 +192,8 @@ async def bot_reply_handler(client, message):
 
     user_id, original_msg_id, wait_msg_id = user_data if len(user_data) == 3 else (*user_data, None)
 
-    is_wait_msg = message.text and "ᴅᴏᴡɴʟᴏᴀᴅɪɴɢ" in message.text.lower()
+    is_wait_msg = message.text and message.text.startswith("Dᴏᴡɴʟᴏᴀᴅɪɴɢ Yᴏᴜʀ Rᴇᴇʟꜱ 🩷")
+
 
     try:
         if message.media:
