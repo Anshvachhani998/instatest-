@@ -27,7 +27,7 @@ class Bot(Client):
             api_id=API_ID,
             api_hash=API_HASH,
             bot_token=BOT_TOKEN,
-            plugins={"root": "plugins"},  # Plugin folder
+            plugins={"root": "plugins"},
             workers=200,
             sleep_threshold=10,
         )
@@ -62,7 +62,7 @@ app = Bot()
 
 # Main function to start both clients
 async def main():
-    await app.run()
+    await app.start()
     logging.info("✅ Bot client started.")
 
     await userbot.start()
@@ -72,4 +72,5 @@ async def main():
     await asyncio.Event().wait()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
