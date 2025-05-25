@@ -177,23 +177,23 @@ async def bot_receive_link(client, message):
         print(e)
 
 # Step 2: When userbot replies back in main bot's PM (USERBOT_CHAT_ID)
-@userbot.on_message(
-    filters.chat(GROUP_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply
-)
-async def group_reply_handler(client, message):
-    reply_to_id = message.reply_to_message.id
-    user_info = message_map.get(reply_to_id)
+# message_map now stores: reply_to_id -> (user_id, original_msg_id, wait_msg_id or None)
 
-    if not user_info:
+@app.on_message(filters.chat(USERBOT_CHAT_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
+async def bot_reply_handler(client, message):
+    reply_to_msg = message.reply_to_message
+    reply_to_id = reply_to_msg.id
+    user_data = message_map.get(reply_to_id)
+
+    if not user_data:
         return
 
-    user_id, original_msg_id, *rest = user_info
+    user_id, original_msg_id, wait_msg_id = user_data if len(user_data) == 3 else (*user_data, None)
 
-    # Forward current message to user
     try:
-        forwarded = await client.copy_message(
+        forwarded_msg = await client.copy_message(
             chat_id=user_id,
-            from_chat_id=GROUP_ID,
+            from_chat_id=USERBOT_CHAT_ID,
             message_id=message.id,
             reply_to_message_id=original_msg_id,
             caption=message.caption or "✅ Here is your file."
@@ -202,22 +202,24 @@ async def group_reply_handler(client, message):
         print("❌ Error sending to user:", e)
         return
 
-    # If it's a status update (like "please wait"), just store the new forwarded message id
-    if message.text and message.text.lower().startswith("⏳ please wait"):
-        # Update the map to store forwarded status message ID
-        message_map[reply_to_id] = (user_id, original_msg_id, forwarded.id)
+    # Check if this is a "please wait" message
+    is_wait_msg = message.text and message.text.lower().startswith("⏳ please wait")
+
+    if is_wait_msg:
+        # Update message_map with wait_msg_id
+        message_map[reply_to_id] = (user_id, original_msg_id, forwarded_msg.id)
         return
 
-    # It's a final message (video/photo/etc), delete old "please wait" message if stored
-    if len(user_info) == 3:
-        old_forwarded_msg_id = user_info[2]
+    # If final message, delete previous "please wait" message if exists
+    if wait_msg_id:
         try:
-            await client.delete_messages(chat_id=user_id, message_ids=old_forwarded_msg_id)
+            await client.delete_messages(chat_id=user_id, message_ids=wait_msg_id)
         except Exception as e:
-            print("⚠️ Couldn't delete previous message:", e)
+            print("⚠️ Couldn't delete old status message:", e)
 
-    # Done processing this message chain
+    # Clean up the mapping fully after final message
     del message_map[reply_to_id]
+
 
 # ----- Main Runner -----
 
