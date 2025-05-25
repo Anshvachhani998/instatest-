@@ -60,16 +60,17 @@ class Bot(Client):
 
 app = Bot()
 
-# Main function to start both clients
 async def main():
     await app.start()
     logging.info("✅ Bot client started.")
 
     await userbot.start()
-    @userbot.on_message(filters.private & filters.incoming)
-    async def userbot_test(client, message):
-        await message.reply("✅ Userbot is running!")
-        
+
+    @userbot.on_message(filters.private & filters.incoming & filters.text)
+    async def userbot_ping(client, message):
+        if message.text.lower() == "!ping":
+            await message.reply("🏓 **Pong!** Userbot is active.")
+
     logging.info("✅ Userbot client started.")
 
     # Keep alive
