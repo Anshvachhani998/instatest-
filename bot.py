@@ -66,33 +66,24 @@ class Userbot(Client):
 app = Bot()
 userbot = Userbot()
 
-# Yeh decorator userbot.start ke baad hi hona chahiye
-@userbot.on_message(filters.private & filters.text & filters.incoming)
-async def userbot_ping(client, message):
-    text = message.text.lower()
-    if "!ping" == text:
-        await message.reply("🏓 Userbot is running!")
-    elif "https://www.instagram.com/" in text:
-        # Instagram link mila
-        await message.reply("✅ Instagram link received! Processing your request...")
-        await process_queue(client)
-
-
-
-
 from collections import deque
 import asyncio
+from pyrogram import filters
 
 GROUP_ID = -1002506415678
 queue = deque()
 processing = False
 message_map = {}
 
-@userbot.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
+@userbot.on_message(filters.private & filters.text & filters.incoming)
 async def userbot_receive_link(client, message):
-    queue.append((message.chat.id, message.text, message.id))
-    await message.reply("Link added to queue, please wait...")
-    await process_queue(client)
+    text = message.text.lower()
+    if "https://www.instagram.com/" in text:
+        queue.append((message.chat.id, message.text, message.id))
+        await message.reply("✅ Instagram link received! Processing your request...")
+        await process_queue(client)
+    elif text == "!ping":
+        await message.reply("🏓 Userbot is running!")
 
 async def process_queue(client):
     global processing
@@ -102,16 +93,39 @@ async def process_queue(client):
     processing = True
     user_id, link, user_msg_id = queue.popleft()
 
+    # Send link to group
     sent_msg = await client.send_message(GROUP_ID, link)
+    # Map sent group message id to original user info
     message_map[sent_msg.message_id] = (user_id, user_msg_id)
 
+    # Wait max 30 seconds for reply in group
     for _ in range(30):
         await asyncio.sleep(1)
+        # If reply received, entry will be removed from message_map
         if sent_msg.message_id not in message_map:
             break
 
     processing = False
+    # Process next in queue (if any)
     await process_queue(client)
+
+@userbot.on_message(filters.chat(GROUP_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
+async def group_reply_handler(client, message):
+    reply_to_id = message.reply_to_message.message_id
+    user_info = message_map.get(reply_to_id)
+
+    if user_info:
+        user_id, original_msg_id = user_info
+
+        # Forward reply to original user
+        await client.copy_message(
+            chat_id=user_id,
+            from_chat_id=GROUP_ID,
+            message_id=message.message_id
+        )
+
+        # Clean up map entry
+        del message_map[reply_to_id]
 
 
 USERBOT_CHAT_ID = 5785483456
@@ -124,19 +138,6 @@ async def bot_receive_link(client, message):
 
     await app.send_message(USERBOT_CHAT_ID, message.text)
 
-
-@userbot.on_message(filters.chat(GROUP_ID) & (filters.video | filters.document | filters.photo) & filters.reply)
-async def group_reply_handler(client, message):
-    reply_id = message.reply_to_message.message_id
-    user_info = message_map.get(reply_id)
-
-    if user_info:
-        user_id, original_msg_id = user_info
-
-        # Userbot se Bot ko forward karo (use userbot chat with Bot)
-        await client.send_message(USERBOT_CHAT_ID, f"Reply for {user_id}", reply_to_message_id=message.message_id)
-
-        del message_map[reply_id]
 
 # ----- Main Runner -----
 
