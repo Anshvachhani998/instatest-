@@ -190,15 +190,22 @@ async def bot_reply_handler(client, message):
 
     user_id, original_msg_id, wait_msg_id = user_data if len(user_data) == 3 else (*user_data, None)
 
+    is_wait_msg = message.text and message.text.lower().startswith("⏳ please wait")
+
     try:
         if message.media:
-            # Media message with caption
+            # Media: copy_message
             forwarded_msg = await client.copy_message(
                 chat_id=user_id,
                 from_chat_id=USERBOT_CHAT_ID,
                 message_id=message.id,
                 reply_to_message_id=original_msg_id,
                 caption=message.caption or "✅ Here is your file."
+            )
+        elif is_wait_msg:
+            forwarded_msg = await client.send_message(
+                chat_id=user_id,
+                text=message.text
             )
         else:
             forwarded_msg = await client.send_message(
@@ -209,23 +216,18 @@ async def bot_reply_handler(client, message):
         print("❌ Error sending to user:", e)
         return
 
-    # Check if this is a "please wait" message
-    is_wait_msg = message.text and message.text.lower().startswith("⏳ please wait")
-
     if is_wait_msg:
-        # Update message_map with wait_msg_id
         message_map[reply_to_id] = (user_id, original_msg_id, forwarded_msg.id)
         return
 
-            
     if wait_msg_id:
         try:
             await client.delete_messages(chat_id=user_id, message_ids=wait_msg_id)
         except Exception as e:
             print("⚠️ Couldn't delete old status message:", e)
 
-    # Clean up the mapping fully after final message
     del message_map[reply_to_id]
+
 
 
 # ----- Main Runner -----
