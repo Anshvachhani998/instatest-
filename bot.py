@@ -16,8 +16,6 @@ import random
 import asyncio
 import logging
 from collections import deque
-from pyrogram.filters import all as all_filter
-from pyrogram.handlers import StopPropagation
 
 logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
