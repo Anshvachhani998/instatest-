@@ -167,13 +167,6 @@ async def group_reply_handler(client, message):
         except Exception as e:
             print(f"Error copying message: {e}")
 
-MAINTENANCE_MODE = True
-
-@app.on_message(filters.all, group=-1)
-async def maintenance_blocker(client, message):
-    if MAINTENANCE_MODE and not message.text.startswith("/maintancemode"):
-        await message.reply("🔧 **Bot is under maintenance. Please try again later.**")
-        raise StopPropagation
 
 
 async def main():
