@@ -49,14 +49,18 @@ class Bot(Client):
         logging.info("🛑 Bot Stopped.")
 
 
-# ----- Userbot -----
-userbot = Client(
-    name="userbot",
-    api_id=API_ID,
-    api_hash=API_HASH,
-    session_string=USER_SESSION
-)
+class Userbot(Client):
+    def __init__(self):
+        super().__init__(
+            name="userbot",
+            api_id=API_ID,
+            api_hash=API_HASH,
+            session_string=USER_SESSION,
+            plugins={"root": "plugins"},
+            workers=50,
+        )
 
+userbot = Userbot()
 
 # Yeh decorator userbot.start ke baad hi hona chahiye
 @userbot.on_message(filters.private & filters.text & filters.incoming)
