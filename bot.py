@@ -14,6 +14,9 @@ from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_CHANNEL, PORT, USER_S
 logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
 
+
+USERBOT_CHAT_ID = 5785483456
+
 # ----- Bot with Plugins -----
 class Bot(Client):
     def __init__(self):
