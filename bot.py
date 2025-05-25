@@ -145,7 +145,7 @@ async def group_reply_handler(client, message):
 USERBOT_CHAT_ID = 5785483456
 
 @app.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
-async def bot_receive_link(client, message: Message):
+async def bot_receive_link(client, message):
     await message.reply("✅ Link received. Processing...")
     try:
         sent = await app.send_message(USERBOT_CHAT_ID, message.text)
@@ -156,7 +156,7 @@ async def bot_receive_link(client, message: Message):
 
 # Step 2: When userbot replies back in main bot's PM (USERBOT_CHAT_ID)
 @app.on_message(filters.chat(USERBOT_CHAT_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
-async def bot_reply_handler(client, message: Message):
+async def bot_reply_handler(client, message):
     reply_to_id = message.reply_to_message.id
     user_info = message_map.get(reply_to_id)
 
