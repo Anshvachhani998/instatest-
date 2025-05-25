@@ -87,25 +87,27 @@ message_map = {}
 @userbot.on_message(filters.private & filters.text & filters.incoming)
 async def userbot_receive_link(client, message):
     text = message.text.lower()
+
     if "https://www.instagram.com/" in text:
         queue.append((message.chat.id, message.text, message.id))
+        position = len(queue)
 
-        # 📊 Check position in queue
-        position = len(queue)  # because abhi append hua hai
-        status_msg = "⏳ Please wait..."
-
-        if processing:
-            status_msg += f"\n🔢 You are #{position} in queue."
+        if not processing and position == 1:
+            status_msg = "**Dᴏᴡɴʟᴏᴀᴅɪɴɢ Yᴏᴜʀ Rᴇᴇʟꜱ 🩷**"
         else:
-            status_msg += "\n✅ Your request will be processed shortly."
-
-        status_msg += f"\n🔄 Currently processing: {'1' if processing else '0'} request."
+            status_msg = (
+                "**Dᴏᴡɴʟᴏᴀᴅɪɴɢ Yᴏᴜʀ Rᴇᴇʟꜱ 🩷**"
+                f"\n🔢 You are #{position} in queue."
+                f"\n🔄 Currently processing: {'1' if processing else '0'} request."
+            )
 
         await message.reply(status_msg)
         await process_queue(client)
 
     elif text == "!ping":
         await message.reply("🏓 Userbot is running!")
+
+
 
 
 async def process_queue(client):
