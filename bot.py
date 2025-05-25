@@ -191,13 +191,20 @@ async def bot_reply_handler(client, message):
     user_id, original_msg_id, wait_msg_id = user_data if len(user_data) == 3 else (*user_data, None)
 
     try:
-        forwarded_msg = await client.copy_message(
-            chat_id=user_id,
-            from_chat_id=USERBOT_CHAT_ID,
-            message_id=message.id,
-            reply_to_message_id=original_msg_id,
-            caption=message.caption or "✅ Here is your file."
-        )
+        if message.media:
+            # Media message with caption
+            forwarded_msg = await client.copy_message(
+                chat_id=user_id,
+                from_chat_id=USERBOT_CHAT_ID,
+                message_id=message.id,
+                reply_to_message_id=original_msg_id,
+                caption=message.caption or "✅ Here is your file."
+            )
+        else:
+            forwarded_msg = await client.send_message(
+                chat_id=user_id,
+                text="❌ Sorry, the requested content was not found."
+            )
     except Exception as e:
         print("❌ Error sending to user:", e)
         return
@@ -210,14 +217,6 @@ async def bot_reply_handler(client, message):
         message_map[reply_to_id] = (user_id, original_msg_id, forwarded_msg.id)
         return
 
-    if message.text:
-        try:
-            await client.send_message(
-                chat_id=user_id,
-                text="❌ Sorry, the requested content was not found."
-            )
-        except Exception as e:
-            print("❌ Error sending common message:", e)
             
     if wait_msg_id:
         try:
