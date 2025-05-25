@@ -106,6 +106,18 @@ async def process_queue(client):
     processing = False
     await process_queue(client)
 
+
+USERBOT_CHAT_ID = 5785483456
+
+@app.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
+async def bot_receive_link(client, message):
+    # Bot ko private message Instagram link mila
+    # Ab ye link userbot ko bhejna hai
+    await message.reply("✅ Link received. Processing...")
+
+    await userbot.send_message(USERBOT_CHAT_ID, message.text)
+
+
 @userbot.on_message(filters.chat(GROUP_ID) & (filters.video | filters.document | filters.photo) & filters.reply)
 async def group_reply_handler(client, message):
     reply_id = message.reply_to_message.message_id
