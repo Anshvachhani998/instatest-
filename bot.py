@@ -210,7 +210,15 @@ async def bot_reply_handler(client, message):
         message_map[reply_to_id] = (user_id, original_msg_id, forwarded_msg.id)
         return
 
-    # If final message, delete previous "please wait" message if exists
+    if message.text:
+        try:
+            await client.send_message(
+                chat_id=user_id,
+                text="❌ Sorry, the requested content was not found."
+            )
+        except Exception as e:
+            print("❌ Error sending common message:", e)
+            
     if wait_msg_id:
         try:
             await client.delete_messages(chat_id=user_id, message_ids=wait_msg_id)
