@@ -133,7 +133,8 @@ async def group_reply_handler(client, message):
             chat_id=user_id,
             from_chat_id=GROUP_ID,
             message_id=message.id,
-            caption="Your new caption here"
+            caption="Your new caption here",
+            reply_to_message_id=original_msg_id 
 
         )
 
@@ -145,10 +146,7 @@ USERBOT_CHAT_ID = 5785483456
 
 @app.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
 async def bot_receive_link(client, message):
-    # Bot ko private message Instagram link mila
-    # Ab ye link userbot ko bhejna hai
     await message.reply("✅ Link received. Processing...")
-
     await app.send_message(USERBOT_CHAT_ID, message.text)
 
 
