@@ -75,9 +75,16 @@ async def main():
     await userbot.start()
     me = await userbot.get_me()
     logging.info(me.first_name)
-    logging.info("✅ Userbot client started.")
+    from pyrogram.handlers import MessageHandler
+
+    async def userbot_ping(client, message):
+        if message.text.lower() == "!ping":
+            await message.reply("🏓 Userbot is running!")
+
+    userbot.add_handler(MessageHandler(userbot_ping, filters.private & filters.text & filters.incoming))
 
     await asyncio.Event().wait()
+
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
