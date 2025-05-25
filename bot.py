@@ -69,6 +69,52 @@ async def userbot_ping(client, message):
     if message.text.lower() == "!ping":
         await message.reply("🏓 Userbot is running!")
 
+from collections import deque
+import asyncio
+
+GROUP_ID = -1002506415678
+queue = deque()
+processing = False
+message_map = {}
+
+@userbot.on_message(filters.chat(USERBOT_CHAT_ID) & filters.text)
+async def userbot_receive_link(client, message):
+    # Userbot ko Bot se link mila
+    queue.append((message.chat.id, message.text, message.id))
+    await message.reply("Link added to queue, please wait...")
+    await process_queue(client)
+
+async def process_queue(client):
+    global processing
+    if processing or not queue:
+        return
+
+    processing = True
+    user_id, link, user_msg_id = queue.popleft()
+
+    sent_msg = await client.send_message(GROUP_ID, link)
+    message_map[sent_msg.message_id] = (user_id, user_msg_id)
+
+    for _ in range(30):
+        await asyncio.sleep(1)
+        if sent_msg.message_id not in message_map:
+            break
+
+    processing = False
+    await process_queue(client)
+
+@userbot.on_message(filters.chat(GROUP_ID) & (filters.video | filters.document | filters.photo) & filters.reply)
+async def group_reply_handler(client, message):
+    reply_id = message.reply_to_message.message_id
+    user_info = message_map.get(reply_id)
+
+    if user_info:
+        user_id, original_msg_id = user_info
+
+        # Userbot se Bot ko forward karo (use userbot chat with Bot)
+        await client.send_message(USERBOT_CHAT_ID, f"Reply for {user_id}", reply_to_message_id=message.message_id)
+
+        del message_map[reply_id]
 
 # ----- Main Runner -----
 app = Bot()
