@@ -14,7 +14,7 @@ async def git_pull(client, message):
     working_directory = "/home/ubuntu/InstaDL2"
 
     process = subprocess.Popen(
-        "git pull https://github.com/Anshvachhani998/InstaDL2",
+        "git pull https://github.com/Anshvachhani998/instatest-",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
