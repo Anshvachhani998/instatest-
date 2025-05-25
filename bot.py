@@ -120,7 +120,7 @@ async def process_queue(client):
     processing = True
     user_id, link, user_msg_id = queue.popleft()
 
-    # Randomly select a group from GROUP_IDS
+
     selected_group = random.choice(GROUP_ID)
 
     try:
@@ -133,7 +133,6 @@ async def process_queue(client):
         processing = False
         return
 
-    # Wait for up to 30 seconds for a response
     for _ in range(30):
         await asyncio.sleep(1)
         if sent_msg.id not in message_map:
@@ -156,17 +155,17 @@ async def group_reply_handler(client, message):
 
     if user_info:
         user_id, original_msg_id = user_info
-
-        await client.copy_message(
-            chat_id=user_id,
-            from_chat_id=GROUP_ID,
-            message_id=message.id,
-            caption="Here is your file ✅",
-            reply_to_message_id=original_msg_id
-        )
-
-        del message_map[reply_to_id]
-
+        try:
+            await client.copy_message(
+                chat_id=user_id,
+                from_chat_id=message.chat.id,  # ✅ use actual group this message came from
+                message_id=message.id,
+                caption="Here is your file ✅",
+                reply_to_message_id=original_msg_id
+            )
+            del message_map[reply_to_id]
+        except Exception as e:
+            print(f"Error copying message: {e}")
 
 USERBOT_CHAT_ID = 5785483456
 
