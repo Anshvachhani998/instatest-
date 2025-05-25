@@ -24,7 +24,7 @@ logging.getLogger("pyrogram").setLevel(logging.ERROR)
 pyroutils.MIN_CHAT_ID = -999999999999
 pyroutils.MIN_CHANNEL_ID = -100999999999999
 
-GROUP_IDS = [-1002506415678, -1002506415678]
+GROUP_ID = [-1002506415678, -1002506415678]
 USERBOT_CHAT_ID = 5785483456
 
 # ----- Bot with Plugins -----
@@ -121,7 +121,7 @@ async def process_queue(client):
     user_id, link, user_msg_id = queue.popleft()
 
     # Randomly select a group from GROUP_IDS
-    selected_group = random.choice(GROUP_IDS)
+    selected_group = random.choice(GROUP_ID)
 
     try:
         sent_msg = await client.send_message(selected_group, link)
