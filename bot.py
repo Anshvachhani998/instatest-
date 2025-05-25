@@ -103,26 +103,32 @@ async def process_queue(client):
 
     try:
         sent_msg = await client.send_message(GROUP_ID, link)
-        logging.info(f"Sent message to group {GROUP_ID}: {sent_msg.id}")  # changed here
-        message_map[sent_msg.id] = (user_id, user_msg_id)  # and here
+        logging.info(f"Sent message to group {GROUP_ID}: {sent_msg.id}")
+        message_map[sent_msg.id] = (user_id, user_msg_id)
     except Exception as e:
         logging.info(f"Failed to send message to group: {e}")
-        await client.send_message(user_id, "❌ Unable to send link to group.")
+        await client.send_message(user_id, "❌ Unable to send link to group.", reply_to_message_id=user_msg_id)
         processing = False
         return
 
-    # Wait for replies or timeout
     for _ in range(30):
         await asyncio.sleep(1)
-        if sent_msg.id not in message_map:  # changed here
+        if sent_msg.id not in message_map:
             break
+    else:
+        # ⛔ No reply from group in 30 seconds – reply to user's message
+        await client.send_message(
+            chat_id=user_id,
+            text="⚠️ Sorry, no response received from group within 30 seconds.",
+            reply_to_message_id=user_msg_id
+        )
+        del message_map[sent_msg.id]
 
     processing = False
-    await process_queue(client)
 
 @userbot.on_message(filters.chat(GROUP_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
 async def group_reply_handler(client, message):
-    reply_to_id = message.reply_to_message.id  # change here
+    reply_to_id = message.reply_to_message.id
     user_info = message_map.get(reply_to_id)
 
     if user_info:
