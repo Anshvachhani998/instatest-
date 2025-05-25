@@ -10,7 +10,6 @@ import pytz
 from datetime import date, datetime
 from plugins import web_server
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_CHANNEL, PORT, USER_SESSION
-from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_CHANNEL, PORT, USER_SESSION
 from pyrogram import types
 from pyrogram import utils as pyroutils
 
@@ -21,8 +20,6 @@ logging.getLogger("pyrogram").setLevel(logging.ERROR)
 pyroutils.MIN_CHAT_ID = -999999999999
 pyroutils.MIN_CHANNEL_ID = -100999999999999
 
-logging.getLogger().setLevel(logging.INFO)
-logging.getLogger("pyrogram").setLevel(logging.ERROR)
 
 USERBOT_CHAT_ID = 5785483456
 
@@ -75,23 +72,41 @@ class Userbot(Client):
 app = Bot()
 userbot = Userbot()
 
+
+
 from collections import deque
 import asyncio
-from pyrogram import filters
+import logging
 
-GROUP_ID = -1002506415678
 queue = deque()
 processing = False
 message_map = {}
+
+GROUP_ID = -1001234567890  # replace with your group ID
 
 @userbot.on_message(filters.private & filters.text & filters.incoming)
 async def userbot_receive_link(client, message):
     text = message.text.lower()
     if "https://www.instagram.com/" in text:
         queue.append((message.chat.id, message.text, message.id))
+
+        # 📊 Check position in queue
+        position = len(queue)  # because abhi append hua hai
+        status_msg = "⏳ Please wait..."
+
+        if processing:
+            status_msg += f"\n🔢 You are #{position} in queue."
+        else:
+            status_msg += "\n✅ Your request will be processed shortly."
+
+        status_msg += f"\n🔄 Currently processing: {'1' if processing else '0'} request."
+
+        await message.reply(status_msg)
         await process_queue(client)
+
     elif text == "!ping":
         await message.reply("🏓 Userbot is running!")
+
 
 async def process_queue(client):
     global processing
@@ -103,20 +118,20 @@ async def process_queue(client):
 
     try:
         sent_msg = await client.send_message(GROUP_ID, link)
-        logging.info(f"Sent message to group {GROUP_ID}: {sent_msg.id}")
+        logging.info(f"Sent to group {GROUP_ID}: {sent_msg.id}")
         message_map[sent_msg.id] = (user_id, user_msg_id)
     except Exception as e:
-        logging.info(f"Failed to send message to group: {e}")
+        logging.error(f"Send to group failed: {e}")
         await client.send_message(user_id, "❌ Unable to send link to group.", reply_to_message_id=user_msg_id)
         processing = False
         return
 
+    # ⏳ Wait for group reply
     for _ in range(30):
         await asyncio.sleep(1)
         if sent_msg.id not in message_map:
             break
     else:
-        # ⛔ No reply from group in 30 seconds – reply to user's message
         await client.send_message(
             chat_id=user_id,
             text="⚠️ Sorry, no response received from group within 30 seconds.",
@@ -125,6 +140,8 @@ async def process_queue(client):
         del message_map[sent_msg.id]
 
     processing = False
+    await process_queue(client)
+
 
 @userbot.on_message(filters.chat(GROUP_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
 async def group_reply_handler(client, message):
@@ -138,12 +155,12 @@ async def group_reply_handler(client, message):
             chat_id=user_id,
             from_chat_id=GROUP_ID,
             message_id=message.id,
-            caption="Your new caption here",
-            reply_to_message_id=original_msg_id 
-
+            caption="Here is your file ✅",
+            reply_to_message_id=original_msg_id
         )
 
         del message_map[reply_to_id]
+
 
 
 
