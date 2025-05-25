@@ -79,13 +79,10 @@ async def main():
     await userbot.start()
     me = await userbot.get_me()
     logging.info(me.first_name)
-    from pyrogram.handlers import MessageHandler
-
-    async def userbot_ping(client, message):
-        if message.text.lower() == "!ping":
-            await message.reply("🏓 Userbot is running!")
-
-    userbot.add_handler(MessageHandler(userbot_ping, filters.private & filters.text & filters.incoming))
+    plugins_path = "./plugins"
+    for filename in os.listdir(plugins_path):
+        if filename.endswith(".py"):
+            importlib.import_module(f"plugins.{filename[:-3]}")
 
     await asyncio.Event().wait()
 
