@@ -179,23 +179,30 @@ async def bot_receive_link(client, message):
 # Step 2: When userbot replies back in main bot's PM (USERBOT_CHAT_ID)
 @app.on_message(filters.chat(USERBOT_CHAT_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
 async def bot_reply_handler(client, message):
-    reply_to_id = message.reply_to_message.id
+    reply_to_msg = message.reply_to_message
+    reply_to_id = reply_to_msg.id
     user_info = message_map.get(reply_to_id)
 
-    if user_info:
-        user_id, original_msg_id = user_info
-        try:
-            await client.copy_message(
-                chat_id=user_id,
-                from_chat_id=USERBOT_CHAT_ID,
-                message_id=message.id,
-                reply_to_message_id=original_msg_id,
-                caption=message.caption or "✅ Here is your file."
-            )
-        except Exception as e:
-            print("❌ Error sending to user:", e)
+    if not user_info:
+        return
 
-        # Clean up
+    user_id, original_msg_id = user_info
+
+    try:
+        await client.copy_message(
+            chat_id=user_id,
+            from_chat_id=USERBOT_CHAT_ID,
+            message_id=message.id,
+            reply_to_message_id=original_msg_id,
+            caption=message.caption or "✅ Here is your file."
+        )
+    except Exception as e:
+        print("❌ Error sending to user:", e)
+        return
+
+    # ⚠️ Only delete mapping if it's NOT a status/update message
+    # You can add more conditions as needed
+    if not (message.text and message.text.lower().startswith("⏳ please wait")):
         del message_map[reply_to_id]
 
 
