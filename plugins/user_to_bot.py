@@ -5,10 +5,11 @@ from pyrogram.types import Message
 from collections import deque
 import re
 from bot import message_map, queue, processing
+from info import USERBOT_CHAT_ID
 
 app = Client
 
-USERBOT_CHAT_ID = 5785483456
+
 
 @Client.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
 async def bot_receive_link(client, message):
