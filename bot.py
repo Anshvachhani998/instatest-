@@ -66,6 +66,10 @@ async def main():
     logging.info("✅ Bot client started.")
 
     await userbot.start()
+    @userbot.on_message(filters.private & filters.incoming)
+    async def userbot_test(client, message):
+        await message.reply("✅ Userbot is running!")
+        
     logging.info("✅ Userbot client started.")
 
     # Keep alive
