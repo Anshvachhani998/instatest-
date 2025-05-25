@@ -80,9 +80,8 @@ queue = deque()
 processing = False
 message_map = {}
 
-@userbot.on_message(filters.chat(USERBOT_CHAT_ID) & filters.text)
+@userbot.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
 async def userbot_receive_link(client, message):
-    # Userbot ko Bot se link mila
     queue.append((message.chat.id, message.text, message.id))
     await message.reply("Link added to queue, please wait...")
     await process_queue(client)
