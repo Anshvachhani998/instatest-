@@ -69,8 +69,16 @@ userbot = Userbot()
 # Yeh decorator userbot.start ke baad hi hona chahiye
 @userbot.on_message(filters.private & filters.text & filters.incoming)
 async def userbot_ping(client, message):
-    if message.text.lower() == "!ping":
+    text = message.text.lower()
+     if "!ping" == text:
         await message.reply("🏓 Userbot is running!")
+     elif "https://www.instagram.com/" in text:
+        # Instagram link mila
+        await message.reply("✅ Instagram link received! Processing your request...")
+        await process_queue(client)
+
+
+
 
 from collections import deque
 import asyncio
