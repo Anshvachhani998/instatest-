@@ -8,7 +8,7 @@ from bot import message_map, queue, processing
 
 USERBOT_CHAT_ID = 5785483456
 
-@app.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
+@Client.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
 async def bot_receive_link(client, message):
     await message.reply("✅ Link received. Processing...")
     try:
@@ -18,7 +18,7 @@ async def bot_receive_link(client, message):
         await message.reply("❌ Failed to send to userbot.")
         print(e)
 
-@app.on_message(filters.chat(USERBOT_CHAT_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
+@Client.on_message(filters.chat(USERBOT_CHAT_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
 async def bot_reply_handler(client, message):
     reply_to_msg = message.reply_to_message
     reply_to_id = reply_to_msg.id
