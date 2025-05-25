@@ -73,6 +73,8 @@ async def main():
     logging.info("✅ Bot client started.")
 
     await userbot.start()
+    me = await userbot.get_me()
+    logging.info(me.first_name)
     logging.info("✅ Userbot client started.")
 
     await asyncio.Event().wait()
