@@ -93,20 +93,23 @@ async def process_queue(client):
     processing = True
     user_id, link, user_msg_id = queue.popleft()
 
-    # Send link to group
-    sent_msg = await client.send_message(GROUP_ID, link)
-    # Map sent group message id to original user info
-    message_map[sent_msg.message_id] = (user_id, user_msg_id)
+    try:
+        sent_msg = await client.send_message(GROUP_ID, link)
+        logging.info(f"Sent message to group {GROUP_ID}: {sent_msg.message_id}")
+        message_map[sent_msg.message_id] = (user_id, user_msg_id)
+    except Exception as e:
+        logging.info(f"Failed to send message to group: {e}")
+        await client.send_message(user_id, "❌ Unable to send link to group.")
+        processing = False
+        return
 
-    # Wait max 30 seconds for reply in group
+    # Wait for replies or timeout
     for _ in range(30):
         await asyncio.sleep(1)
-        # If reply received, entry will be removed from message_map
         if sent_msg.message_id not in message_map:
             break
 
     processing = False
-    # Process next in queue (if any)
     await process_queue(client)
 
 @userbot.on_message(filters.chat(GROUP_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
