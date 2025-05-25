@@ -1,4 +1,5 @@
 from pyrogram.handlers import MessageHandler
+from bot import userbot
 
 async def userbot_ping(client, message):
     if message.text.lower() == "!pings":
