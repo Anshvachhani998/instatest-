@@ -12,6 +12,10 @@ from plugins import web_server
 from info import SESSION, API_ID, API_HASH, BOT_TOKEN, LOG_CHANNEL, PORT, USER_SESSION
 from pyrogram import types
 from pyrogram import utils as pyroutils
+import random
+import asyncio
+import logging
+from collections import deque
 
 logging.getLogger().setLevel(logging.INFO)
 logging.getLogger("pyrogram").setLevel(logging.ERROR)
@@ -108,8 +112,6 @@ async def userbot_receive_link(client, message):
         await message.reply("🏓 Userbot is running!")
 
 
-
-
 async def process_queue(client):
     global processing
     if processing or not queue:
@@ -118,9 +120,12 @@ async def process_queue(client):
     processing = True
     user_id, link, user_msg_id = queue.popleft()
 
+    # Randomly select a group from GROUP_IDS
+    selected_group = random.choice(GROUP_IDS)
+
     try:
-        sent_msg = await client.send_message(GROUP_ID, link)
-        logging.info(f"Sent to group {GROUP_ID}: {sent_msg.id}")
+        sent_msg = await client.send_message(selected_group, link)
+        logging.info(f"Sent to group {selected_group}: {sent_msg.id}")
         message_map[sent_msg.id] = (user_id, user_msg_id)
     except Exception as e:
         logging.error(f"Send to group failed: {e}")
@@ -128,7 +133,7 @@ async def process_queue(client):
         processing = False
         return
 
-    # ⏳ Wait for group reply
+    # Wait for up to 30 seconds for a response
     for _ in range(30):
         await asyncio.sleep(1)
         if sent_msg.id not in message_map:
@@ -143,7 +148,6 @@ async def process_queue(client):
 
     processing = False
     await process_queue(client)
-
 
 @userbot.on_message(filters.chat(GROUP_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
 async def group_reply_handler(client, message):
@@ -164,8 +168,6 @@ async def group_reply_handler(client, message):
         del message_map[reply_to_id]
 
 
-
-
 USERBOT_CHAT_ID = 5785483456
 
 @app.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
@@ -177,9 +179,6 @@ async def bot_receive_link(client, message):
     except Exception as e:
         await message.reply("❌ Failed to send to userbot.")
         print(e)
-
-# Step 2: When userbot replies back in main bot's PM (USERBOT_CHAT_ID)
-# message_map now stores: reply_to_id -> (user_id, original_msg_id, wait_msg_id or None)
 
 @app.on_message(filters.chat(USERBOT_CHAT_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
 async def bot_reply_handler(client, message):
@@ -194,10 +193,8 @@ async def bot_reply_handler(client, message):
 
     is_wait_msg = message.text and message.text.startswith("Dᴏᴡɴʟᴏᴀᴅɪɴɢ Yᴏᴜʀ Rᴇᴇʟꜱ 🩷")
 
-
     try:
         if message.media:
-            # Media: copy_message
             forwarded_msg = await client.copy_message(
                 chat_id=user_id,
                 from_chat_id=USERBOT_CHAT_ID,
@@ -236,11 +233,6 @@ async def bot_reply_handler(client, message):
             print("⚠️ Couldn't delete old status message:", e)
 
     del message_map[reply_to_id]
-
-
-
-# ----- Main Runner -----
-
 
 async def main():
     await app.start()
