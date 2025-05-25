@@ -24,7 +24,7 @@ logging.getLogger("pyrogram").setLevel(logging.ERROR)
 pyroutils.MIN_CHAT_ID = -999999999999
 pyroutils.MIN_CHANNEL_ID = -100999999999999
 
-GROUP_ID = -1002506415678
+GROUP_ID = [-1002506415678]
 USERBOT_CHAT_ID = 5785483456
 
 # ----- Bot with Plugins -----
