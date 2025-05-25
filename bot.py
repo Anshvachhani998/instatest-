@@ -145,9 +145,36 @@ async def group_reply_handler(client, message):
 USERBOT_CHAT_ID = 5785483456
 
 @app.on_message(filters.private & filters.text & filters.regex(r"https://www\.instagram\.com/"))
-async def bot_receive_link(client, message):
+async def bot_receive_link(client, message: Message):
     await message.reply("✅ Link received. Processing...")
-    await app.send_message(USERBOT_CHAT_ID, message.text)
+    try:
+        sent = await app.send_message(USERBOT_CHAT_ID, message.text)
+        message_map[sent.id] = (message.chat.id, message.id)
+    except Exception as e:
+        await message.reply("❌ Failed to send to userbot.")
+        print(e)
+
+# Step 2: When userbot replies back in main bot's PM (USERBOT_CHAT_ID)
+@app.on_message(filters.chat(USERBOT_CHAT_ID) & (filters.video | filters.document | filters.photo | filters.text) & filters.reply)
+async def bot_reply_handler(client, message: Message):
+    reply_to_id = message.reply_to_message.id
+    user_info = message_map.get(reply_to_id)
+
+    if user_info:
+        user_id, original_msg_id = user_info
+        try:
+            await client.copy_message(
+                chat_id=user_id,
+                from_chat_id=USERBOT_CHAT_ID,
+                message_id=message.id,
+                reply_to_message_id=original_msg_id,
+                caption=message.caption or "✅ Here is your file."
+            )
+        except Exception as e:
+            print("❌ Error sending to user:", e)
+
+        # Clean up
+        del message_map[reply_to_id]
 
 
 # ----- Main Runner -----
