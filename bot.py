@@ -104,8 +104,8 @@ async def process_queue(client):
 
     try:
         sent_msg = await client.send_message(GROUP_ID, link)
-        logging.info(f"Sent message to group {GROUP_ID}: {sent_msg.message_id}")
-        message_map[sent_msg.message_id] = (user_id, user_msg_id)
+        logging.info(f"Sent message to group {GROUP_ID}: {sent_msg.id}")  # changed here
+        message_map[sent_msg.id] = (user_id, user_msg_id)  # and here
     except Exception as e:
         logging.info(f"Failed to send message to group: {e}")
         await client.send_message(user_id, "❌ Unable to send link to group.")
@@ -115,7 +115,7 @@ async def process_queue(client):
     # Wait for replies or timeout
     for _ in range(30):
         await asyncio.sleep(1)
-        if sent_msg.message_id not in message_map:
+        if sent_msg.id not in message_map:  # changed here
             break
 
     processing = False
