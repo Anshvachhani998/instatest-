@@ -12,7 +12,7 @@ USERBOT_CHAT_ID = 5785483456
 async def bot_receive_link(client, message):
     await message.reply("✅ Link received. Processing...")
     try:
-        sent = await app.send_message(USERBOT_CHAT_ID, message.text)
+        sent = await client.send_message(USERBOT_CHAT_ID, message.text)
         message_map[sent.id] = (message.chat.id, message.id)
     except Exception as e:
         await message.reply("❌ Failed to send to userbot.")
