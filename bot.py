@@ -89,7 +89,6 @@ async def userbot_receive_link(client, message):
     text = message.text.lower()
     if "https://www.instagram.com/" in text:
         queue.append((message.chat.id, message.text, message.id))
-        await message.reply("✅ Instagram link received! Processing your request...")
         await process_queue(client)
     elif text == "!ping":
         await message.reply("🏓 Userbot is running!")
